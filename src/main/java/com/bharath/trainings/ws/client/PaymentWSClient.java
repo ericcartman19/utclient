@@ -2,6 +2,12 @@ package com.bharath.trainings.ws.client;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Map;
+
+import org.apache.cxf.endpoint.Client;
+import org.apache.cxf.endpoint.Endpoint;
+import org.apache.cxf.frontend.ClientProxy;
+import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
 
 import com.trainings.ws.soap.PaymentProcessor;
 import com.trainings.ws.soap.PaymentProcessorRequest;
@@ -15,9 +21,22 @@ public class PaymentWSClient {
 		// creamos una instancia del servicio
 		// esta vez crearemos nuestro propio cliente, no utilizaremos SoapUi
 		try {
+			// configuramos una instancia del service provider
 			PaymentProcessor_Service service = 
 					new PaymentProcessor_Service(new URL("http://localhost:8080/javafirstwsut/services/paymentProcessor?wsdl"));
 			PaymentProcessor port = service.getPaymentProcessorPort();
+			
+			// creamos una instancia del client
+			Client client = ClientProxy.getClient(port);
+			Endpoint endpoint = client.getEndpoint();
+			
+			// necesitamos implementar un interceptor en el client side, en contrapartida
+			// al que hemos creado en el provider
+			// queremos indicar que queremos utilizar the User Name Token Profile Security
+			// and the username that should be used
+			Map<String, Object> props = null;
+			WSS4JOutInterceptor wssOut = new WSS4JOutInterceptor();
+			endpoint.getOutInterceptors().add(wssOut);
 			
 			PaymentProcessorResponse response = port.processPayment(new PaymentProcessorRequest());
 			System.out.println(response.isResult());
