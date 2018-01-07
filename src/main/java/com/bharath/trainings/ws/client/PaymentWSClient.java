@@ -2,12 +2,15 @@ package com.bharath.trainings.ws.client;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.endpoint.Endpoint;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.handler.WSHandlerConstants;
 
 import com.trainings.ws.soap.PaymentProcessor;
 import com.trainings.ws.soap.PaymentProcessorRequest;
@@ -32,11 +35,14 @@ public class PaymentWSClient {
 			
 			// necesitamos implementar un interceptor en el client side, en contrapartida
 			// al que hemos creado en el provider
-			// queremos indicar que queremos utilizar the User Name Token Profile Security
-			// and the username that should be used
-			Map<String, Object> props = null;
+			Map<String, Object> props = new HashMap<>();
 			WSS4JOutInterceptor wssOut = new WSS4JOutInterceptor();
 			endpoint.getOutInterceptors().add(wssOut);
+			// queremos indicar que queremos utilizar the User Name Token Profile Security
+			props.put(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
+			// and the username that should be used
+			props.put(WSHandlerConstants.USER, "cxf");
+			props.put(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
 			
 			PaymentProcessorResponse response = port.processPayment(new PaymentProcessorRequest());
 			System.out.println(response.isResult());
