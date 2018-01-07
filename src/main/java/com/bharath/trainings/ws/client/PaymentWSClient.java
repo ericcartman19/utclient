@@ -36,13 +36,16 @@ public class PaymentWSClient {
 			// necesitamos implementar un interceptor en el client side, en contrapartida
 			// al que hemos creado en el provider
 			Map<String, Object> props = new HashMap<>();
-			WSS4JOutInterceptor wssOut = new WSS4JOutInterceptor();
-			endpoint.getOutInterceptors().add(wssOut);
 			// queremos indicar que queremos utilizar the User Name Token Profile Security
 			props.put(WSHandlerConstants.ACTION, WSHandlerConstants.USERNAME_TOKEN);
 			// and the username that should be used
 			props.put(WSHandlerConstants.USER, "cxf");
 			props.put(WSHandlerConstants.PASSWORD_TYPE, WSConstants.PW_TEXT);
+			// indicamos la clase que va a configurar los call backs
+			props.put(WSHandlerConstants.PW_CALLBACK_CLASS, UTPasswordCallback.class.getName());
+			
+			WSS4JOutInterceptor wssOut = new WSS4JOutInterceptor(props);
+			endpoint.getOutInterceptors().add(wssOut);
 			
 			PaymentProcessorResponse response = port.processPayment(new PaymentProcessorRequest());
 			System.out.println(response.isResult());
